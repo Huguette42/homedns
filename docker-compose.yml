@@ -9,3 +9,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     restart: unless-stopped
+  
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    command: tunnel --no-autoupdate run --token eyJhIjoiZTU0N2ExNmE5ODMzODllOTgxYzRhNTA1ZGZkM2VjOGMiLCJ0IjoiYThmODQzMTEtNjVlNC00OTBjLThlYTEtZWIwMzkxZjgyZTgzIiwicyI6Ik5XWmhZalJsWWpFdFpXSm1PQzAwTVdZM0xUa3hOREV0WWpnNE5HWmlaR1EyT0dVMiJ9 --protocol http2
+    restart: always
