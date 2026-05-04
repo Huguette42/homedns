@@ -2,10 +2,74 @@
 
 declare(strict_types=1);
 
+session_start();
+
 require_once __DIR__ . '/src/DnsResolver.php';
 require_once __DIR__ . '/src/helpers.php';
 
 use Homedns\DnsResolver;
+
+if (isset($_GET['logout'])) {
+    $_SESSION = [];
+    session_destroy();
+    header('Location: index.php');
+    exit;
+}
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+    $password = (string) ($_POST['password'] ?? '');
+    if ($password === 'SIO2026') {
+        $_SESSION['homedns_authenticated'] = true;
+        header('Location: index.php');
+        exit;
+    }
+
+    $_SESSION['homedns_authenticated'] = false;
+    $authError = 'Mot de passe incorrect.';
+}
+
+if (empty($_SESSION['homedns_authenticated'])) {
+    $authError = $authError ?? null;
+    ?>
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Homedns - Connexion</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="main.css">
+    </head>
+    <body>
+        <main class="auth-shell">
+            <section class="auth-card">
+                <div class="brand auth-brand">
+                    <img src="siolatin.png" alt="Logo Homedns" class="brand-logo">
+                    <div>
+                        <p class="eyebrow">Accès protégé</p>
+                        <h1>Homedns</h1>
+                    </div>
+                </div>
+
+                <p class="hero-text">Entrez le mot de passe pour accéder au site.</p>
+
+                <?php if (!empty($authError)): ?>
+                    <div class="auth-error"><?php echo htmlspecialchars($authError, ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+
+                <form method="post" class="auth-form">
+                    <input type="password" name="password" placeholder="Mot de passe" class="auth-input" autofocus>
+                    <button type="submit" class="button button-primary">Entrer</button>
+                </form>
+            </section>
+        </main>
+    </body>
+    </html>
+    <?php
+    exit;
+}
 
 $domains = [
     ['name' => 'Boris Perier', 'domain' => 'perier.local'],
@@ -260,6 +324,7 @@ $offlineCount = $testedCount - $onlineCount;
                     <a class="button button-ghost" href="<?php echo htmlspecialchars(buildUrl(['search' => $search, 'view' => $view === 'table' ? 'cards' : 'table', 'sort' => $sort, 'dir' => $dir]), ENT_QUOTES, 'UTF-8'); ?>">
                         <?php echo $view === 'table' ? 'Vue cartes' : 'Vue tableau'; ?>
                     </a>
+                    <a class="button button-ghost" href="?logout=1">Déconnexion</a>
                 </form>
             </div>
         </section>
